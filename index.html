@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="すまいFirst">
+<title>すまいファースト CRM</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.47.0/tabler-icons.min.css">
+<style>
+:root {
+  --bg: #f7f6f3;
+  --surface: #ffffff;
+  --surface2: #f0efe9;
+  --border: rgba(0,0,0,0.10);
+  --border2: rgba(0,0,0,0.18);
+  --text: #1a1a18;
+  --text2: #6b6b67;
+  --text3: #a0a09c;
+  --accent: #1a1a18;
+  --accent-fg: #ffffff;
+  --radius: 10px;
+  --radius-lg: 14px;
+  --font: 'Helvetica Neue', 'Hiragino Sans', 'Yu Gothic UI', sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #141412;
+    --surface: #1e1e1c;
+    --surface2: #272724;
+    --border: rgba(255,255,255,0.10);
+    --border2: rgba(255,255,255,0.18);
+    --text: #f0efe9;
+    --text2: #9a9a94;
+    --text3: #5a5a56;
+    --accent: #f0efe9;
+    --accent-fg: #1a1a18;
+  }
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; background: var(--bg); font-family: var(--font); }
+.app { max-width: 430px; margin: 0 auto; min-height: 100vh; display: flex; flex-direction: column; background: var(--bg); }
+
+/* Topbar */
+.topbar { background: var(--surface); border-bottom: 0.5px solid var(--border); padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+.topbar-logo { display: flex; align-items: center; gap: 7px; }
+.topbar-logo-mark { width: 26px; height: 26px; background: var(--accent); border-radius: 6px; display: flex; align-items: center; justify-content: center; }
+.topbar-logo-mark i { font-size: 14px; color: var(--accent-fg); }
+.topbar-name { font-size: 14px; font-weight: 600; color: var(--text); letter-spacing: -0.3px; }
+.topbar-actions { display: flex; gap: 5px; }
+.icon-btn { width: 32px; height: 32px; border-radius: 8px; border: 0.5px solid var(--border2); background: transparent; color: var(--text2); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 15px; }
+.icon-btn:active { background: var(--surface2); }
+
+/* Tab bar */
+.tabbar { display: flex; background: var(--surface); border-bottom: 0.5px solid var(--border); position: sticky; top: 50px; z-index: 99; }
+.tab { flex: 1; padding: 10px 4px 9px; text-align: center; font-size: 10px; color: var(--text3); cursor: pointer; border-bottom: 2px solid transparent; transition: color .15s, border-color .15s; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.tab i { font-size: 16px; }
+.tab.active { color: var(--text); border-bottom-color: var(--accent); font-weight: 600; }
+
+/* Content */
+.view { padding: 14px 14px 90px; display: none; }
+.view.active { display: block; }
+
+/* Stat grid */
+.stat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 14px; }
+.stat-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 12px 14px; }
+.stat-label { font-size: 11px; color: var(--text2); margin-bottom: 4px; }
+.stat-value { font-size: 22px; font-weight: 700; color: var(--text); letter-spacing: -0.5px; }
+.stat-sub { font-size: 11px; color: var(--text3); margin-top: 2px; }
+
+/* Pipeline */
+.section-label { font-size: 11px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.6px; margin: 14px 0 8px; }
+.pipeline { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 6px; scrollbar-width: none; margin-bottom: 4px; }
+.pipeline::-webkit-scrollbar { display: none; }
+.pipe-col { min-width: 78px; flex-shrink: 0; background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 8px 6px; text-align: center; }
+.pipe-stage { font-size: 10px; font-weight: 600; padding: 2px 6px; border-radius: 100px; display: inline-block; margin-bottom: 5px; }
+.pipe-count { font-size: 20px; font-weight: 700; color: var(--text); }
+
+/* Customer card */
+.client-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 12px; margin-bottom: 8px; }
+.card-top { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.avatar { width: 38px; height: 38px; border-radius: 50%; background: var(--surface2); border: 0.5px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: var(--text); flex-shrink: 0; }
+.card-name { font-size: 14px; font-weight: 600; color: var(--text); }
+.card-nick { font-size: 12px; color: var(--text2); font-weight: 400; }
+.badges { display: flex; gap: 4px; flex-wrap: wrap; align-items: center; margin-top: 3px; }
+.card-meta { font-size: 12px; color: var(--text2); margin-bottom: 8px; display: flex; align-items: center; gap: 4px; }
+.card-actions { display: flex; gap: 5px; flex-wrap: wrap; }
+
+/* Stage badges */
+.badge { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 100px; display: inline-block; }
+.b-s0 { background: #deeeff; color: #1055a0; }
+.b-s1 { background: #fff0d6; color: #7a4a00; }
+.b-s2 { background: #ede9ff; color: #4832a0; }
+.b-s3 { background: #ffeaea; color: #960000; }
+.b-s4 { background: #dff5e5; color: #1a6b35; }
+.b-rs { background: #dff5e5; color: #1a6b35; }
+.b-ra { background: #deeeff; color: #1055a0; }
+.b-rb { background: #fff0d6; color: #7a4a00; }
+.b-rc { background: #f0efe9; color: #444; }
+.b-rde { background: #ffeaea; color: #960000; }
+.src-dot-slack { display: inline-block; width: 8px; height: 8px; background: #4A154B; border-radius: 2px; vertical-align: -1px; margin-right: 3px; }
+.src-dot-mail { display: inline-block; width: 8px; height: 8px; background: #EA4335; border-radius: 50%; vertical-align: -1px; margin-right: 3px; }
+
+/* Buttons */
+.btn { font-size: 11px; padding: 5px 10px; border: 0.5px solid var(--border2); border-radius: 8px; background: transparent; color: var(--text2); cursor: pointer; font-family: var(--font); }
+.btn:active { background: var(--surface2); }
+.btn-primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); font-size: 14px; padding: 13px; border-radius: var(--radius); width: 100%; font-weight: 600; font-family: var(--font); cursor: pointer; margin-top: 10px; }
+.btn-primary:active { opacity: 0.85; }
+
+/* FAB */
+.fab { position: fixed; bottom: 24px; right: 20px; width: 54px; height: 54px; border-radius: 50%; background: var(--accent); color: var(--accent-fg); border: none; font-size: 26px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 200; box-shadow: 0 4px 16px rgba(0,0,0,0.18); }
+.fab:active { opacity: 0.85; transform: scale(0.96); }
+
+/* Filter chips */
+.filter-row { display: flex; gap: 5px; overflow-x: auto; scrollbar-width: none; margin-bottom: 10px; }
+.filter-row::-webkit-scrollbar { display: none; }
+.chip { font-size: 11px; padding: 5px 11px; border-radius: 100px; border: 0.5px solid var(--border2); background: transparent; color: var(--text2); cursor: pointer; white-space: nowrap; font-family: var(--font); }
+.chip.on { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); font-weight: 600; }
+
+/* Revenue rows */
+.rev-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); margin-bottom: 5px; }
+.rev-total { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: var(--surface2); border-radius: var(--radius); margin-top: 8px; }
+
+/* Overlay & Modal */
+.overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 300; display: flex; align-items: flex-end; justify-content: center; }
+.modal { background: var(--surface); border-radius: 20px 20px 0 0; width: 100%; max-width: 430px; padding: 20px 16px 36px; max-height: 90vh; overflow-y: auto; }
+.modal-title { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
+.modal-close { background: none; border: none; font-size: 22px; cursor: pointer; color: var(--text3); padding: 2px; }
+
+/* Form */
+.form-label { font-size: 12px; color: var(--text2); margin-bottom: 4px; display: block; margin-top: 12px; }
+.form-input { width: 100%; padding: 9px 11px; border: 0.5px solid var(--border2); border-radius: var(--radius); font-size: 14px; background: var(--surface); color: var(--text); font-family: var(--font); }
+.form-input:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.stage-sel { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; margin-top: 4px; }
+.stage-opt { padding: 6px 4px; text-align: center; font-size: 11px; font-weight: 600; border: 1.5px solid var(--border); border-radius: 8px; cursor: pointer; background: var(--surface2); color: var(--text2); transition: all .12s; }
+.stage-opt.sel { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+
+/* Source tabs */
+.src-tabs { display: flex; border: 0.5px solid var(--border2); border-radius: var(--radius); overflow: hidden; margin-bottom: 12px; }
+.src-tab { flex: 1; padding: 9px 4px; text-align: center; font-size: 11px; cursor: pointer; background: transparent; border: none; color: var(--text2); font-family: var(--font); font-weight: 500; }
+.src-tab.on { background: var(--accent); color: var(--accent-fg); font-weight: 700; }
+
+/* Message cards */
+.msg-card { background: var(--surface2); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 11px; margin-bottom: 8px; }
+.msg-head { display: flex; align-items: center; gap: 7px; margin-bottom: 6px; }
+.msg-av-slack { width: 24px; height: 24px; border-radius: 6px; background: #4A154B; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: #fff; flex-shrink: 0; }
+.msg-av-mail { width: 24px; height: 24px; border-radius: 50%; background: #EA4335; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: #fff; flex-shrink: 0; }
+.msg-sender { font-size: 12px; font-weight: 600; color: var(--text); }
+.msg-ts { font-size: 10px; color: var(--text3); margin-left: auto; }
+.msg-body { font-size: 12px; color: var(--text); line-height: 1.55; white-space: pre-wrap; word-break: break-word; }
+.msg-subject { font-size: 11px; color: var(--text2); margin-bottom: 4px; font-style: italic; }
+.type-badge { display: inline-flex; align-items: center; gap: 3px; font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 100px; margin-bottom: 5px; }
+.tb-tel { background: #deeeff; color: #1055a0; }
+.tb-mail { background: #dff5e5; color: #1a6b35; }
+.tb-excl { background: #f0efe9; color: #888; }
+
+/* Extract box */
+.extract-box { background: var(--surface); border: 0.5px solid var(--border2); border-radius: var(--radius); padding: 10px; margin-top: 8px; }
+.extract-row { display: flex; align-items: baseline; gap: 8px; padding: 4px 0; border-bottom: 0.5px solid var(--border); }
+.extract-row:last-child { border-bottom: none; }
+.extract-key { font-size: 11px; color: var(--text2); min-width: 82px; flex-shrink: 0; }
+.extract-val { font-size: 12px; color: var(--text); flex: 1; }
+
+/* AI loading */
+.ai-loading { display: flex; align-items: center; gap: 8px; padding: 12px; color: var(--text2); font-size: 12px; }
+.dot { width: 5px; height: 5px; border-radius: 50%; background: var(--text2); animation: pulse 1.2s ease-in-out infinite; display: inline-block; }
+.dot:nth-child(2) { animation-delay: .2s; }
+.dot:nth-child(3) { animation-delay: .4s; }
+@keyframes pulse { 0%,80%,100% { opacity: .25; } 40% { opacity: 1; } }
+
+/* Info note */
+.info-note { font-size: 11px; color: var(--text2); padding: 8px 10px; background: var(--surface2); border-radius: var(--radius); margin-bottom: 10px; line-height: 1.55; }
+
+/* Excl summary */
+.excl-summary { margin-top: 12px; padding: 10px; background: var(--bg); border-radius: var(--radius); border: 0.5px solid var(--border); }
+.excl-row { display: flex; align-items: center; justify-content: space-between; padding: 5px 0; border-bottom: 0.5px solid var(--border); }
+.excl-row:last-child { border-bottom: none; }
+
+/* Toast */
+.toast { position: fixed; bottom: 88px; left: 50%; transform: translateX(-50%); background: var(--accent); color: var(--accent-fg); font-size: 13px; font-weight: 600; padding: 8px 18px; border-radius: 100px; z-index: 500; opacity: 0; transition: opacity .3s; white-space: nowrap; pointer-events: none; }
+.toast.show { opacity: 1; }
+
+/* Detail rows */
+.det-row { display: flex; justify-content: space-between; align-items: flex-start; padding: 10px 12px; background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); margin-bottom: 5px; gap: 10px; }
+.det-key { font-size: 12px; color: var(--text2); white-space: nowrap; }
+.det-val { font-size: 13px; color: var(--text); text-align: right; font-weight: 500; }
+
+/* SS checkboxes */
+.ss-row { display: flex; align-items: flex-start; gap: 10px; padding: 10px 0; border-bottom: 0.5px solid var(--border); }
+.ss-row:last-child { border-bottom: none; }
+.ss-cb { width: 18px; height: 18px; border-radius: 4px; border: 1.5px solid var(--border2); background: var(--surface); cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; transition: background .12s; }
+.ss-cb.on { background: var(--accent); border-color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <div class="topbar-logo">
+      <div class="topbar-logo-mark"><i class="ti ti-building"></i></div>
+      <span class="topbar-name">すまいファースト</span>
+    </div>
+    <div class="topbar-actions">
+      <button class="icon-btn" onclick="openImp()" title="取込"><i class="ti ti-inbox"></i></button>
+      <button class="icon-btn" onclick="openExp()" title="エクスポート"><i class="ti ti-file-export"></i></button>
+    </div>
+  </div>
+
+  <div class="tabbar">
+    <div class="tab active" id="tab-d" onclick="sw('d')"><i class="ti ti-layout-dashboard"></i>ダッシュ</div>
+    <div class="tab" id="tab-c" onclick="sw('c')"><i class="ti ti-users"></i>顧客</div>
+    <div class="tab" id="tab-s" onclick="sw('s')"><i class="ti ti-chart-bar"></i>売上</div>
+  </div>
+
+  <!-- Dashboard -->
+  <div class="view active" id="v-d">
+    <div class="stat-grid">
+      <div class="stat-card"><div class="stat-label">今月売上</div><div class="stat-value" id="sm">¥0</div><div class="stat-sub">成約 <span id="sc">0</span>件</div></div>
+      <div class="stat-card"><div class="stat-label">進行中</div><div class="stat-value" id="sa">0</div><div class="stat-sub">件の案件</div></div>
+      <div class="stat-card"><div class="stat-label">今月の反響</div><div class="stat-value" id="sn">0</div><div class="stat-sub">件</div></div>
+      <div class="stat-card"><div class="stat-label">審査中</div><div class="stat-value" id="sr">0</div><div class="stat-sub">件</div></div>
+    </div>
+    <div class="section-label">進捗パイプライン</div>
+    <div class="pipeline" id="pipe"></div>
+    <div class="section-label">直近の顧客</div>
+    <div id="rec"></div>
+  </div>
+
+  <!-- Clients -->
+  <div class="view" id="v-c">
+    <div class="filter-row" id="fr">
+      <button class="chip on" data-s="all" onclick="flt(this)">すべて</button>
+      <button class="chip" data-s="0" onclick="flt(this)">反響</button>
+      <button class="chip" data-s="1" onclick="flt(this)">案内前</button>
+      <button class="chip" data-s="2" onclick="flt(this)">案内済</button>
+      <button class="chip" data-s="3" onclick="flt(this)">審査中</button>
+      <button class="chip" data-s="4" onclick="flt(this)">契約</button>
+    </div>
+    <div id="cl"></div>
+  </div>
+
+  <!-- Sales -->
+  <div class="view" id="v-s">
+    <div class="stat-grid" style="margin-bottom:16px">
+      <div class="stat-card"><div class="stat-label">総売上</div><div class="stat-value" id="ts">¥0</div></div>
+      <div class="stat-card"><div class="stat-label">成約件数</div><div class="stat-value" id="tc">0件</div></div>
+    </div>
+    <div class="section-label">売上内訳</div>
+    <div id="sbd"></div>
+  </div>
+</div>
+
+<button class="fab" onclick="openAdd()"><i class="ti ti-plus"></i></button>
+<div class="toast" id="tst"></div>
+
+<!-- 取込 -->
+<div id="m-imp" style="display:none"><div class="overlay"><div class="modal">
+  <div class="modal-title">反響を取り込む<button class="modal-close" onclick="cm('m-imp')"><i class="ti ti-x"></i></button></div>
+  <div class="src-tabs">
+    <button class="src-tab on" id="stb-slk" onclick="sSrc('slk')">📞 #電話対応</button>
+    <button class="src-tab" id="stb-gml" onclick="sSrc('gml')">✉️ Gmail</button>
+    <button class="src-tab" id="stb-ss" onclick="sSrc('ss')">📋 アンケート</button>
+  </div>
+  <div id="p-slk">
+    <p style="font-size:11px;color:var(--text2);margin-bottom:10px">#電話対応（fondesk）の着信メモをAIが解析します</p>
+    <button class="btn-primary" onclick="ldSlk()" style="margin-top:0"><i class="ti ti-refresh" style="font-size:13px;margin-right:4px"></i>着信メモを取得</button>
+    <div id="slk-list" style="margin-top:12px"></div>
+  </div>
+  <div id="p-gml" style="display:none">
+    <div class="info-note"><i class="ti ti-filter" style="font-size:11px;vertical-align:-1px;margin-right:3px"></i>WordPress問い合わせフォームからの入居相談メールのみ取込。プラグイン更新・コメント通知・営業メールは自動除外します。</div>
+    <button class="btn-primary" onclick="ldGml()" style="margin-top:0"><i class="ti ti-refresh" style="font-size:13px;margin-right:4px"></i>メールをスキャン</button>
+    <div id="gml-list" style="margin-top:12px"></div>
+  </div>
+  <div id="p-ss" style="display:none">
+    <p style="font-size:11px;color:var(--text2);margin-bottom:10px">アンケートフォームの回答データから取り込みます</p>
+    <div id="ss-lst" style="background:var(--surface2);border-radius:var(--radius);padding:10px;margin-bottom:10px"></div>
+    <div style="display:flex;gap:7px">
+      <button class="btn" style="flex:1;padding:10px" onclick="togAll()">全選択/解除</button>
+      <button class="btn-primary" style="flex:2;margin-top:0;padding:10px" onclick="doSS()">選択して取込</button>
+    </div>
+  </div>
+</div></div></div>
+
+<!-- AI抽出 -->
+<div id="m-ex" style="display:none"><div class="overlay"><div class="modal">
+  <div class="modal-title"><span id="ex-ttl">AI抽出結果</span><button class="modal-close" onclick="cm('m-ex')"><i class="ti ti-x"></i></button></div>
+  <div id="ex-orig" style="margin-bottom:10px"></div>
+  <div id="ex-ld" style="display:none"><div class="ai-loading"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span style="margin-left:4px">AIが解析中...</span></div></div>
+  <div id="ex-res" style="display:none">
+    <p style="font-size:11px;color:var(--text2);margin-bottom:7px">抽出された情報を確認してください</p>
+    <div class="extract-box" id="ex-flds"></div>
+    <div style="display:flex;align-items:center;gap:8px;margin-top:12px">
+      <span style="font-size:12px;color:var(--text2);white-space:nowrap">進捗</span>
+      <div class="stage-sel" id="ex-xs" style="flex:1;margin-top:0">
+        <div class="stage-opt b-s0 sel" data-v="0">反響</div><div class="stage-opt b-s1" data-v="1">案内前</div><div class="stage-opt b-s2" data-v="2">案内済</div><div class="stage-opt b-s3" data-v="3">審査中</div><div class="stage-opt b-s4" data-v="4">契約</div>
+      </div>
+    </div>
+    <button class="btn-primary" onclick="doReg()"><i class="ti ti-user-plus" style="font-size:13px;margin-right:4px"></i>顧客として登録</button>
+  </div>
+</div></div></div>
+
+<!-- 追加/編集 -->
+<div id="m-add" style="display:none"><div class="overlay"><div class="modal">
+  <div class="modal-title" id="add-ttl">顧客を追加<button class="modal-close" onclick="cm('m-add')"><i class="ti ti-x"></i></button></div>
+  <label class="form-label">顧客名 *</label><input class="form-input" id="f-nm" placeholder="田中 花子">
+  <label class="form-label">ニックネーム / LINEのお名前</label><input class="form-input" id="f-nk" placeholder="はなちゃん">
+  <div class="form-grid" style="margin-top:12px">
+    <div><label class="form-label" style="margin-top:0">物件名</label><input class="form-input" id="f-pr" placeholder="〇〇マンション"></div>
+    <div><label class="form-label" style="margin-top:0">号室</label><input class="form-input" id="f-rm" placeholder="302"></div>
+  </div>
+  <label class="form-label">電話番号</label><input class="form-input" id="f-tel" placeholder="080-xxxx-xxxx">
+  <label class="form-label">希望エリア / 現住所</label><input class="form-input" id="f-area" placeholder="青葉区・太白区">
+  <label class="form-label">メモ</label><textarea class="form-input" id="f-memo" rows="2" placeholder="生活保護受給中、1階希望..." style="resize:none"></textarea>
+  <label class="form-label">進捗ステージ</label>
+  <div class="stage-sel" id="add-xs">
+    <div class="stage-opt b-s0 sel" data-v="0">反響</div><div class="stage-opt b-s1" data-v="1">案内前</div><div class="stage-opt b-s2" data-v="2">案内済</div><div class="stage-opt b-s3" data-v="3">審査中</div><div class="stage-opt b-s4" data-v="4">契約</div>
+  </div>
+  <div id="sf" style="display:none">
+    <div class="section-label" style="margin-top:14px">売上（契約時）</div>
+    <div class="form-grid">
+      <div><label class="form-label" style="margin-top:0">仲介手数料</label><input class="form-input" id="fs1" type="number" placeholder="0"></div>
+      <div><label class="form-label" style="margin-top:0">広告料</label><input class="form-input" id="fs2" type="number" placeholder="0"></div>
+      <div><label class="form-label" style="margin-top:0">保証料売上</label><input class="form-input" id="fs3" type="number" placeholder="0"></div>
+      <div><label class="form-label" style="margin-top:0">火災保険売上</label><input class="form-input" id="fs4" type="number" placeholder="0"></div>
+    </div>
+    <label class="form-label">その他売上</label><input class="form-input" id="fs5" type="number" placeholder="0">
+  </div>
+  <button class="btn-primary" onclick="saveC()">保存する</button>
+  <div style="display:flex;gap:8px;margin-top:8px">
+    <button class="btn" style="flex:1;padding:11px;font-size:13px" onclick="cm('m-add')">キャンセル</button>
+    <button class="btn" id="del-btn" style="flex:1;padding:11px;font-size:13px;color:#960000;border-color:#ffc0c0;display:none" onclick="deleteC()"><i class="ti ti-trash" style="font-size:13px;margin-right:3px"></i>削除</button>
+  </div>
+</div></div></div>
+
+<!-- 削除確認 -->
+<div id="m-del" style="display:none"><div class="overlay" style="align-items:center"><div class="modal" style="border-radius:16px;max-width:340px;margin:0 20px;padding:24px 20px">
+  <p style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:8px">顧客を削除しますか？</p>
+  <p id="del-name" style="font-size:13px;color:var(--text2);margin-bottom:20px"></p>
+  <div style="display:flex;gap:8px">
+    <button class="btn" style="flex:1;padding:12px;font-size:13px" onclick="cm('m-del');document.getElementById('m-add').style.display='block'">戻る</button>
+    <button class="btn" style="flex:1;padding:12px;font-size:13px;font-weight:700;color:#960000;border-color:#ffc0c0;background:#fff5f5" onclick="confirmDelete()"><i class="ti ti-trash" style="font-size:13px;margin-right:3px"></i>削除する</button>
+  </div>
+</div></div></div>
+
+<!-- 詳細 -->
+<div id="m-det" style="display:none"><div class="overlay"><div class="modal">
+  <div class="modal-title"><span id="det-ttl"></span><button class="modal-close" onclick="cm('m-det')"><i class="ti ti-x"></i></button></div>
+  <div id="det-bd"></div>
+</div></div></div>
+
+<!-- エクスポート -->
+<div id="m-exp" style="display:none"><div class="overlay"><div class="modal">
+  <div class="modal-title">CSVエクスポート<button class="modal-close" onclick="cm('m-exp')"><i class="ti ti-x"></i></button></div>
+  <div style="background:var(--surface2);border-radius:var(--radius);padding:14px;margin-bottom:14px">
+    <div class="stat-label">出力件数</div><div style="font-size:20px;font-weight:700;margin-top:2px" id="exp-n">0件</div>
+    <div class="stat-label" style="margin-top:12px">出力列</div>
+    <div style="font-size:11px;margin-top:4px;line-height:1.8;color:var(--text)">顧客名 / ニックネーム / 物件名 / 号室 / 進捗 / スコア / ランク / 希望地域 / 取込元 / 電話番号 / 仲介手数料 / 広告料 / 保証料売上 / 火災保険売上 / その他売上 / 合計売上 / 登録日</div>
+  </div>
+  <button class="btn-primary" onclick="doExp()"><i class="ti ti-download" style="font-size:13px;margin-right:4px"></i>CSVをダウンロード</button>
+</div></div></div>
+
+<script>
+// ============================================================
+// ▼ GASデプロイ後、ここにウェブアプリURLを貼り付けてください ▼
+// ============================================================
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbwVhhNMLvJoZGU952wVzw84r5S236apPKZkiQnCq8MD9reNL7EW_GDIuU385JtIK0iHcw/exec';
+// ============================================================
+
+const STG=['反響','案内前','案内済','審査中','契約'];
+const SC=['b-s0','b-s1','b-s2','b-s3','b-s4'];
+const SK=['仲介手数料','広告料','保証料売上','火災保険売上','その他売上'];
+
+// ▼▼▼ アンケートSS・Slack・Gmailのデータはここを実際のものに差し替えてください ▼▼▼
+const SS_D=[
+  {name:'佐竹（大内）朋子',nick:'佐竹（大内）朋子',score:35,rank:'D/Eランク',area:'青葉区',date:'2026/05/01'},
+  {name:'大内',nick:'大内',score:25,rank:'Bランク',area:'青葉区・太白区',date:'2026/05/07'},
+  {name:'渡部　豪',nick:'渡部　豪',score:40,rank:'D/Eランク',area:'仙台市内全域',date:'2026/05/12'},
+  {name:'福永',nick:'福永',score:25,rank:'Bランク',area:'青葉区',date:'2026/05/13'},
+];
+const SLK_D=[
+  {sender:'アダチ ジュンコ',tel:'090-7568-2935',body:'部屋を探しておりますとのお電話でした。折り返しのご連絡を希望されていらっしゃいます。',ts:'2026/05/08 16:10',exName:'（不明）',exNick:'アダチ ジュンコ',exArea:'',exMemo:'部屋探し。折り返し希望。'},
+  {sender:'オオタ',tel:'080-3324-2567',body:'物件名：ルノール1階（太白区ニシタガ）\n現在生活保護を受給されており、腰を痛めているため、1階が希望とのことでした。\n折り返しのご連絡を希望されていらっしゃいます。',ts:'2026/05/07 15:15',exName:'（不明）',exNick:'オオタ',exArea:'太白区',exMemo:'ルノール1階希望。生活保護受給。腰痛あり1階希望。'},
+  {sender:'チュウバチ ユイ',tel:'080-3336-4305',body:'役所から紹介。生活保護を受給していて、母と2人暮らし。母が高齢なのと場所が寒いので引っ越しを検討。折り返し希望。',ts:'2026/04/30 14:15',exName:'（不明）',exNick:'チュウバチ ユイ',exArea:'',exMemo:'役所紹介。生活保護。母と2人暮らし。高齢・寒さで引越し検討。'},
+  {sender:'オノ キヨミ',tel:'080-8221-7544',body:'生活保護受給者ですとアパートを借りれませんか？とのご質問。折り返し希望。',ts:'2026/04/30 10:55',exName:'（不明）',exNick:'オノ キヨミ',exArea:'',exMemo:'生活保護受給者。アパートを借りたいとのお問い合わせ。'},
+];
+const GML_OK=[
+  {from:'福永吉樹',email:'yoshiki-fukunaga1220@i.softbank.jp',body:'台原4丁目の福永吉樹と言います。\n何度か救急搬送されており近隣住人から迷惑だと言われてて今月いっぱいで引っ越さなければなりません。\n現在生活保護受給中で入居可能物件等教えて頂けたなら嬉しいです。',ts:'2026/05/13 22:51',exName:'福永吉樹',exNick:'福永',exArea:'台原4丁目（現住所）',exMemo:'今月中に引越し必要。生活保護受給中。救急搬送歴あり・近隣トラブルで退去。',tel:''},
+];
+const GML_NG=[
+  {from:'西岡彬人（マイベストプロ宮城）',reason:'営業メール'},
+  {from:'二宮忠志郎（B-Roca）',reason:'営業メール'},
+  {from:'中村匠太郎',reason:'営業メール'},
+];
+// ▲▲▲ ここまでデータ部分 ▲▲▲
+
+let clients=[];
+let filtV='all',editId=null,selSt=0,ssSel=new Set([0,1,2,3]),exD={},exSt=0;
+let gasReady = false;
+
+// ── GAS接続判定 ───────────────────────────────────
+function isGasConnected(){ return GAS_URL && GAS_URL !== 'YOUR_GAS_WEB_APP_URL_HERE'; }
+
+// ── API: 全リクエストをGETで送る（CORS回避）────────
+// GASのdoPostはCORSで弾かれるため、payloadをクエリパラメータに乗せてGET送信する
+async function gasCall(action, payload){
+  let url = `${GAS_URL}?action=${action}`;
+  if(payload) url += `&payload=${encodeURIComponent(JSON.stringify(payload))}`;
+  const res = await fetch(url);
+  return res.json();
+}
+
+// ── ローカルキャッシュに保存（オフライン時の保険） ──
+function saveLocal(){ try{localStorage.setItem('smf_gas_cache',JSON.stringify(clients))}catch(e){} }
+function loadLocal(){ try{return JSON.parse(localStorage.getItem('smf_gas_cache')||'[]')}catch(e){return [];} }
+
+// ── 起動時：スプレッドシートから顧客を読み込む ──────
+async function loadClients(){
+  if(!isGasConnected()){
+    clients=loadLocal();
+    if(clients.length===0) initSample();
+    gasReady=false;
+    return;
+  }
+  showBanner('スプレッドシートと同期中...', false);
+  try{
+    const r = await gasCall('getClients');
+    if(r.ok){
+      clients = r.clients;
+      saveLocal();
+      gasReady=true;
+      hideBanner();
+    } else { throw new Error(r.error); }
+  }catch(e){
+    clients=loadLocal();
+    showBanner('オフライン：ローカルデータを表示中', true);
+    gasReady=false;
+  }
+}
+
+// ── 保存（スプレッドシートへ即反映） ─────────────────
+async function save(client){
+  saveLocal();
+  if(!isGasConnected()||!gasReady) return;
+  try{ await gasCall('saveClient', {client}); }catch(e){}
+}
+
+// ── 削除（スプレッドシートからも削除） ───────────────
+async function deleteFromSheet(id){
+  if(!isGasConnected()||!gasReady) return;
+  try{ await gasCall('deleteClient', {id}); }catch(e){}
+}
+
+// ── アンケートデータ取得 ──────────────────────────
+async function fetchAnketFromSheet(){
+  if(!isGasConnected()) return SS_D;
+  try{
+    const r = await gasCall('getAnket');
+    if(r.ok && r.data.length>0) return r.data;
+  }catch(e){}
+  return SS_D;
+}
+
+// ── 同期バナー ────────────────────────────────────
+function showBanner(msg, warn){
+  let b=document.getElementById('sync-banner');
+  if(!b){b=document.createElement('div');b.id='sync-banner';b.style.cssText='position:fixed;top:50px;left:0;right:0;z-index:1000;padding:7px 14px;font-size:12px;font-weight:600;text-align:center;';document.body.appendChild(b);}
+  b.textContent=msg;
+  b.style.background=warn?'#fff0d6':'#deeeff';
+  b.style.color=warn?'#7a4a00':'#1055a0';
+}
+function hideBanner(){const b=document.getElementById('sync-banner');if(b)b.remove();}
+
+function fmt(n){return '¥'+Math.round(n).toLocaleString()}
+function tst(m){const t=document.getElementById('tst');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500)}
+function getRCls(r){if(!r)return '';if(r.startsWith('S'))return 'b-rs';if(r.startsWith('A'))return 'b-ra';if(r.startsWith('B'))return 'b-rb';if(r.startsWith('C'))return 'b-rc';return 'b-rde';}
+function gi(n){const p=n.trim().split(/\s+/);return p.length>=2?p[0][0]+p[1][0]:n.slice(0,2);}
+function srcMark(s){if(s==='slack')return '<span class="src-dot-slack"></span>';if(s==='mail')return '<span class="src-dot-mail"></span>';if(s==='ss')return '<i class="ti ti-table" style="font-size:9px;vertical-align:-1px;margin-right:3px"></i>';return '';}
+
+function initSample(){
+  clients=[
+    {id:'1',name:'山田 太郎',nick:'たろさん',prop:'グランドパレス仙台',room:'203',stage:4,sales:[80000,50000,10000,8000,0],date:'2026-05-01',score:null,rank:null,source:'manual',area:'',tel:'',memo:''},
+    {id:'2',name:'佐藤 美咲',nick:'みーちゃん',prop:'サニーハイツ',room:'101',stage:3,sales:[0,0,0,0,0],date:'2026-05-08',score:null,rank:null,source:'manual',area:'',tel:'',memo:''},
+  ];
+  saveLocal();
+}
+
+function renderD(){
+  const ct=clients.filter(c=>c.stage===4),m=ct.reduce((a,c)=>a+c.sales.reduce((x,y)=>x+y,0),0);
+  document.getElementById('sm').textContent=fmt(m);
+  document.getElementById('sc').textContent=ct.length;
+  document.getElementById('sa').textContent=clients.filter(c=>c.stage<4).length;
+  document.getElementById('sn').textContent=clients.filter(c=>c.stage===0).length;
+  document.getElementById('sr').textContent=clients.filter(c=>c.stage===3).length;
+  const pv=document.getElementById('pipe');pv.innerHTML='';
+  STG.forEach((s,i)=>{const n=clients.filter(c=>c.stage===i).length;const d=document.createElement('div');d.className='pipe-col';d.innerHTML=`<span class="pipe-stage ${SC[i]}">${s}</span><div class="pipe-count">${n}</div>`;pv.appendChild(d);});
+  const rl=document.getElementById('rec');rl.innerHTML='';
+  [...clients].sort((a,b)=>b.id-a.id).slice(0,5).forEach(c=>rl.appendChild(mkC(c)));
+}
+
+function mkC(c){
+  const d=document.createElement('div');d.className='client-card';
+  const rk=c.rank?`<span class="badge ${getRCls(c.rank)}">${c.rank.replace('ランク','')}</span>`:'';
+  const sc=c.score!=null?`<span style="font-size:10px;color:var(--text2)">スコア:${c.score}</span>`:'';
+  d.innerHTML=`<div class="card-top"><div class="avatar">${gi(c.name)}</div>
+    <div style="flex:1;min-width:0">
+      <div class="card-name">${srcMark(c.source)}${c.name}${c.nick&&c.nick!==c.name?` <span class="card-nick">（${c.nick}）</span>`:''}</div>
+      <div class="badges"><span class="badge ${SC[c.stage]}">${STG[c.stage]}</span>${rk}${sc}</div>
+    </div></div>
+    <div class="card-meta">${c.tel?`<i class="ti ti-phone" style="font-size:11px"></i>${c.tel}　`:''}${c.prop?`<i class="ti ti-building" style="font-size:11px"></i>${c.prop}${c.room?' '+c.room+'号室':''}`:'物件未定'}</div>
+    <div class="card-actions">
+      <button class="btn" onclick="openDet(${c.id})"><i class="ti ti-eye" style="font-size:11px"></i> 詳細</button>
+      <button class="btn" onclick="openEd(${c.id})"><i class="ti ti-edit" style="font-size:11px"></i> 編集</button>
+      ${c.stage<4?`<button class="btn" onclick="adv(${c.id})">${STG[c.stage+1]}へ <i class="ti ti-arrow-right" style="font-size:10px"></i></button>`:''}
+    </div>`;
+  return d;
+}
+
+function renderC(){const el=document.getElementById('cl');el.innerHTML='';const f=filtV==='all'?clients:clients.filter(c=>c.stage===parseInt(filtV));if(!f.length){el.innerHTML='<p style="text-align:center;color:var(--text3);padding:32px 0;font-size:13px">該当する顧客がいません</p>';return;}f.forEach(c=>el.appendChild(mkC(c)));}
+function renderS(){const ct=clients.filter(c=>c.stage===4),tot=ct.reduce((a,c)=>a+c.sales.reduce((x,y)=>x+y,0),0);document.getElementById('ts').textContent=fmt(tot);document.getElementById('tc').textContent=ct.length+'件';const bd=[0,0,0,0,0];ct.forEach(c=>c.sales.forEach((v,i)=>bd[i]+=v));const el=document.getElementById('sbd');el.innerHTML='';bd.forEach((v,i)=>{const r=document.createElement('div');r.className='rev-row';r.innerHTML=`<span style="font-size:13px;color:var(--text)">${SK[i]}</span><span style="font-size:14px;font-weight:700">${fmt(v)}</span>`;el.appendChild(r);});const t=document.createElement('div');t.className='rev-total';t.innerHTML=`<span style="font-size:14px;font-weight:700">合計</span><span style="font-size:18px;font-weight:700">${fmt(tot)}</span>`;el.appendChild(t);}
+
+function sw(t){['d','c','s'].forEach(x=>{document.getElementById('v-'+x).classList.toggle('active',x===t);document.getElementById('tab-'+x).classList.toggle('active',x===t);});if(t==='d')renderD();if(t==='c')renderC();if(t==='s')renderS();}
+function flt(el){document.querySelectorAll('#fr .chip').forEach(c=>c.classList.remove('on'));el.classList.add('on');filtV=el.dataset.s;renderC();}
+
+function openImp(){sSrc('slk');document.getElementById('m-imp').style.display='block';}
+function sSrc(s){
+  ['slk','gml','ss'].forEach(x=>{document.getElementById('p-'+x).style.display=x===s?'block':'none';document.getElementById('stb-'+x).classList.toggle('on',x===s);});
+  if(s==='ss'){
+    renderSS();
+    // GAS接続時はスプレッドシートから最新アンケートを取得
+    if(isGasConnected()){
+      fetchAnketFromSheet().then(data=>{
+        if(data&&data.length>0){anketData=data;renderSS();}
+      });
+    }
+  }
+}
+
+function ldSlk(){
+  const el=document.getElementById('slk-list');
+  el.innerHTML='<div class="ai-loading"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span style="margin-left:5px">#電話対応を取得中...</span></div>';
+  setTimeout(()=>{
+    el.innerHTML='';
+    if(!SLK_D.length){el.innerHTML='<p style="font-size:12px;color:var(--text2);text-align:center;padding:16px">新しい着信メモはありません</p>';return;}
+    SLK_D.forEach((m,i)=>{
+      const d=document.createElement('div');d.className='msg-card';
+      d.innerHTML=`<span class="type-badge tb-tel"><i class="ti ti-phone" style="font-size:10px"></i> 電話メモ</span>
+        <div class="msg-head"><div class="msg-av-slack">${m.sender[0]}</div><span class="msg-sender">${m.sender}</span><span class="msg-ts">${m.ts}</span></div>
+        <div class="msg-body">${m.body}</div>
+        <div style="margin-top:8px"><button class="btn" onclick="analyze('slk',${i})"><i class="ti ti-robot" style="font-size:11px;margin-right:2px"></i>AIで顧客情報を抽出</button></div>`;
+      el.appendChild(d);
+    });
+  },900);
+}
+
+function ldGml(){
+  const el=document.getElementById('gml-list');
+  el.innerHTML='<div class="ai-loading"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span style="margin-left:5px">メールをスキャン・分類中...</span></div>';
+  setTimeout(()=>{
+    el.innerHTML='';
+    if(GML_OK.length===0){el.innerHTML='<p style="font-size:12px;color:var(--text2);text-align:center;padding:16px">新しい入居相談メールはありません</p>';}
+    GML_OK.forEach((m,i)=>{
+      const d=document.createElement('div');d.className='msg-card';
+      d.innerHTML=`<span class="type-badge tb-mail"><i class="ti ti-check" style="font-size:10px"></i> 入居相談メール</span>
+        <div class="msg-head"><div class="msg-av-mail">${m.from[0]}</div><span class="msg-sender">${m.from}</span><span class="msg-ts">${m.ts}</span></div>
+        <div class="msg-body">${m.body}</div>
+        <div style="margin-top:8px"><button class="btn" onclick="analyze('gml',${i})"><i class="ti ti-robot" style="font-size:11px;margin-right:2px"></i>AIで顧客情報を抽出</button></div>`;
+      el.appendChild(d);
+    });
+    if(GML_NG.length){
+      const s=document.createElement('div');s.className='excl-summary';
+      s.innerHTML=`<p style="font-size:11px;color:var(--text2);margin-bottom:7px"><i class="ti ti-filter" style="font-size:11px;vertical-align:-1px;margin-right:3px"></i>除外した${GML_NG.length}件</p>`;
+      GML_NG.forEach(m=>{const r=document.createElement('div');r.className='excl-row';r.innerHTML=`<span style="font-size:11px;color:var(--text2)">${m.from}</span><span class="type-badge tb-excl" style="margin-bottom:0;font-size:9px">${m.reason}</span>`;s.appendChild(r);});
+      el.appendChild(s);
+    }
+  },1400);
+}
+
+function analyze(src,idx){
+  const data=src==='slk'?SLK_D[idx]:GML_OK[idx];
+  let oh='';
+  if(src==='slk'){
+    oh=`<div class="msg-card"><span class="type-badge tb-tel"><i class="ti ti-phone" style="font-size:10px"></i> 電話メモ</span><div class="msg-head"><div class="msg-av-slack">${data.sender[0]}</div><span class="msg-sender">${data.sender}</span><span class="msg-ts">${data.ts}</span></div><div class="msg-body">${data.body}</div></div>`;
+    exD={name:data.exName,nick:data.exNick,tel:data.tel,area:data.exArea,memo:data.exMemo,source:'slack'};
+  } else {
+    oh=`<div class="msg-card"><span class="type-badge tb-mail"><i class="ti ti-check" style="font-size:10px"></i> 入居相談メール</span><div class="msg-head"><div class="msg-av-mail">${data.from[0]}</div><span class="msg-sender">${data.from}</span><span class="msg-ts">${data.ts}</span></div><div class="msg-body">${data.body}</div></div>`;
+    exD={name:data.exName,nick:data.exNick,tel:data.tel||'',area:data.exArea,memo:data.exMemo,source:'mail'};
+  }
+  document.getElementById('ex-ttl').textContent=src==='slk'?'電話メモ AI抽出':'メール AI抽出';
+  document.getElementById('ex-orig').innerHTML=oh;
+  document.getElementById('ex-ld').style.display='flex';
+  document.getElementById('ex-res').style.display='none';
+  document.getElementById('m-ex').style.display='block';
+  cm('m-imp');
+  exSt=0;
+  document.querySelectorAll('#ex-xs .stage-opt').forEach((b,i)=>b.classList.toggle('sel',i===0));
+  setTimeout(()=>{
+    document.getElementById('ex-flds').innerHTML=[['氏名',exD.name],['連絡先',exD.tel||'—'],['エリア/現住所',exD.area||'—'],['メモ・状況',exD.memo]].map(([k,v])=>`<div class="extract-row"><span class="extract-key">${k}</span><span class="extract-val">${v}</span></div>`).join('');
+    document.getElementById('ex-ld').style.display='none';
+    document.getElementById('ex-res').style.display='block';
+  },1500);
+}
+document.querySelectorAll('#ex-xs .stage-opt').forEach(b=>{b.addEventListener('click',()=>{exSt=parseInt(b.dataset.v);document.querySelectorAll('#ex-xs .stage-opt').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');});});
+
+function doReg(){
+  const client={id:Date.now().toString(),name:exD.name||'（不明）',nick:exD.nick||'',prop:'',room:'',stage:exSt,sales:[0,0,0,0,0],date:new Date().toISOString().slice(0,10),score:null,rank:null,source:exD.source,area:exD.area||'',tel:exD.tel||'',memo:exD.memo||''};
+  clients.push(client);saveLocal();cm('m-ex');renderD();renderC();renderS();
+  save(client).then(()=>tst('顧客を登録しました（スプレッドシートに反映済み）'));
+}
+
+let anketData=[];
+function renderSS(){
+  const el=document.getElementById('ss-lst');el.innerHTML='';
+  const displayData=anketData.length>0?anketData:SS_D;
+  displayData.forEach((d,i)=>{
+    const name=d.nick||d.name||'';
+    const rank=d.rank||'';
+    const area=d.area||'';
+    const score=d.score!=null?d.score:'—';
+    const date=d.timestamp||d.date||'';
+    const done=clients.some(c=>c.ssIdx===i),on=ssSel.has(i)&&!done;
+    const r=document.createElement('div');r.className='ss-row';
+    r.innerHTML=`<div class="ss-cb${on?' on':''}" id="scb${i}" onclick="togSS(${i})">${on?'<i class="ti ti-check" style="font-size:11px;color:var(--accent-fg)"></i>':''}</div>
+      <div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--text)">${name} <span class="badge ${getRCls(rank)}" style="font-size:9px">${rank}</span></div>
+      <div style="font-size:11px;color:var(--text2);margin-top:2px">${area} ／ スコア:${score} ／ ${date}</div>
+      ${done?'<div style="font-size:10px;color:#1a6b35;margin-top:2px"><i class="ti ti-check"></i> 取込済み</div>':''}</div>`;
+    el.appendChild(r);
+  });
+}
+function togSS(i){if(clients.some(c=>c.ssIdx===i))return;if(ssSel.has(i))ssSel.delete(i);else ssSel.add(i);const cb=document.getElementById('scb'+i);cb.classList.toggle('on',ssSel.has(i));cb.innerHTML=ssSel.has(i)?'<i class="ti ti-check" style="font-size:11px;color:var(--accent-fg)"></i>':'';}
+function togAll(){const all=(anketData.length>0?anketData:SS_D).every((_,i)=>ssSel.has(i)||clients.some(c=>c.ssIdx===i));(anketData.length>0?anketData:SS_D).forEach((_,i)=>{if(clients.some(c=>c.ssIdx===i))return;if(all)ssSel.delete(i);else ssSel.add(i);const cb=document.getElementById('scb'+i);if(cb){cb.classList.toggle('on',ssSel.has(i));cb.innerHTML=ssSel.has(i)?'<i class="ti ti-check" style="font-size:11px;color:var(--accent-fg)"></i>':'';}});}
+function doSS(){
+  const displayData=anketData.length>0?anketData:SS_D;
+  const newOnes=[];
+  ssSel.forEach(i=>{
+    if(clients.some(c=>c.ssIdx===i))return;
+    const d=displayData[i];
+    const client={id:Date.now().toString()+i,name:d.nick||d.name||'',nick:d.nick||d.name||'',prop:'',room:'',stage:0,sales:[0,0,0,0,0],date:d.timestamp||d.date||new Date().toISOString().slice(0,10),score:d.score,rank:d.rank,area:d.area,source:'ss',ssIdx:i,tel:'',memo:''};
+    clients.push(client);newOnes.push(client);
+  });
+  saveLocal();cm('m-imp');tst(newOnes.length+'件を取り込みました');renderD();renderC();renderS();
+  newOnes.forEach(c=>save(c));
+}
+
+function openExp(){document.getElementById('exp-n').textContent=clients.length+'件';document.getElementById('m-exp').style.display='block';}
+function doExp(){
+  const hd=['顧客名','ニックネーム','物件名','号室','進捗','スコア','ランク','希望地域','取込元','電話番号','仲介手数料','広告料','保証料売上','火災保険売上','その他売上','合計売上','登録日'];
+  const rows=clients.map(c=>[c.name,c.nick||'',c.prop||'',c.room||'',STG[c.stage],c.score!=null?c.score:'',c.rank||'',c.area||'',c.source||'manual',c.tel||'',...c.sales,c.sales.reduce((a,b)=>a+b,0),c.date||'']);
+  const csv=[hd,...rows].map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='すまいファースト_'+new Date().toISOString().slice(0,10)+'.csv';a.click();
+  cm('m-exp');tst('CSVをダウンロードしました');
+}
+
+function openAdd(){
+  editId=null;document.getElementById('add-ttl').textContent='顧客を追加';
+  ['f-nm','f-nk','f-pr','f-rm','f-tel','f-area','f-memo'].forEach(id=>document.getElementById(id).value='');
+  document.querySelectorAll('#add-xs .stage-opt').forEach((b,i)=>b.classList.toggle('sel',i===0));
+  selSt=0;document.getElementById('sf').style.display='none';
+  ['fs1','fs2','fs3','fs4','fs5'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('del-btn').style.display='none';
+  document.getElementById('m-add').style.display='block';
+}
+function openEd(id){
+  const c=clients.find(x=>x.id===id);if(!c)return;
+  editId=id;document.getElementById('add-ttl').textContent='顧客を編集';
+  document.getElementById('f-nm').value=c.name;document.getElementById('f-nk').value=c.nick||'';
+  document.getElementById('f-pr').value=c.prop||'';document.getElementById('f-rm').value=c.room||'';
+  document.getElementById('f-tel').value=c.tel||'';document.getElementById('f-area').value=c.area||'';
+  document.getElementById('f-memo').value=c.memo||'';
+  selSt=c.stage;document.querySelectorAll('#add-xs .stage-opt').forEach((b,i)=>b.classList.toggle('sel',i===c.stage));
+  document.getElementById('sf').style.display=c.stage===4?'block':'none';
+  ['fs1','fs2','fs3','fs4','fs5'].forEach((id,i)=>document.getElementById(id).value=c.sales[i]||'');
+  document.getElementById('del-btn').style.display='flex';
+  document.getElementById('m-add').style.display='block';cm('m-det');
+}
+document.querySelectorAll('#add-xs .stage-opt').forEach(b=>{b.addEventListener('click',()=>{selSt=parseInt(b.dataset.v);document.querySelectorAll('#add-xs .stage-opt').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');document.getElementById('sf').style.display=selSt===4?'block':'none';});});
+async function saveC(){
+  const name=document.getElementById('f-nm').value.trim();if(!name){tst('顧客名を入力してください');return;}
+  const sales=['fs1','fs2','fs3','fs4','fs5'].map(id=>parseFloat(document.getElementById(id).value)||0);
+  const base={name,nick:document.getElementById('f-nk').value.trim(),prop:document.getElementById('f-pr').value.trim(),room:document.getElementById('f-rm').value.trim(),stage:selSt,sales,tel:document.getElementById('f-tel').value.trim(),area:document.getElementById('f-area').value.trim(),memo:document.getElementById('f-memo').value.trim()};
+  let client;
+  if(editId){client=clients.find(x=>x.id===editId);Object.assign(client,base);}
+  else{client={id:Date.now().toString(),...base,date:new Date().toISOString().slice(0,10),score:null,rank:null,source:'manual'};clients.push(client);}
+  saveLocal();cm('m-add');renderD();renderC();renderS();
+  await save(client);tst('保存しました（スプレッドシートに反映済み）');
+}
+function adv(id){const c=clients.find(x=>x.id===id);if(!c||c.stage>=4)return;c.stage++;saveLocal();save(c);tst(c.name+'を「'+STG[c.stage]+'」に更新');renderD();renderC();renderS();}
+function deleteC(){
+  if(!editId)return;
+  const c=clients.find(x=>x.id===editId);if(!c)return;
+  document.getElementById('del-name').textContent=c.name+'　の顧客データを完全に削除します。この操作は元に戻せません。';
+  cm('m-add');document.getElementById('m-del').style.display='block';
+}
+async function confirmDelete(){
+  const id=editId;
+  clients=clients.filter(x=>x.id!==id);
+  saveLocal();cm('m-del');tst('顧客を削除しました（スプレッドシートからも削除済み）');editId=null;
+  renderD();renderC();renderS();
+  await deleteFromSheet(id);
+}
+
+
+function openDet(id){
+  const c=clients.find(x=>x.id===id);if(!c)return;
+  document.getElementById('det-ttl').textContent=c.name;
+  const st=c.sales.reduce((a,b)=>a+b,0),rk=c.rank?`<span class="badge ${getRCls(c.rank)}">${c.rank}</span>`:'',sc=c.score!=null?`<span style="font-size:11px;color:var(--text2)">スコア:${c.score}</span>`:'';
+  const sLbl={slack:'#電話対応（fondesk）',mail:'WP問い合わせフォーム',ss:'アンケートSS',manual:'手動入力'}[c.source]||'';
+  document.getElementById('det-bd').innerHTML=`
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+      <div class="avatar" style="width:48px;height:48px;font-size:16px">${gi(c.name)}</div>
+      <div><p style="font-size:16px;font-weight:700">${srcMark(c.source)}${c.name}</p>${c.nick&&c.nick!==c.name?`<p style="font-size:12px;color:var(--text2)">（${c.nick}）</p>`:''}<div class="badges" style="margin-top:4px"><span class="badge ${SC[c.stage]}">${STG[c.stage]}</span>${rk}${sc}</div></div>
+    </div>
+    ${c.tel?`<div class="det-row"><span class="det-key"><i class="ti ti-phone" style="font-size:12px;vertical-align:-1px;margin-right:3px"></i>折り返し番号</span><span class="det-val">${c.tel}</span></div>`:''}
+    ${c.area?`<div class="det-row"><span class="det-key"><i class="ti ti-map-pin" style="font-size:12px;vertical-align:-1px;margin-right:3px"></i>エリア/現住所</span><span class="det-val">${c.area}</span></div>`:''}
+    <div class="det-row"><span class="det-key"><i class="ti ti-building" style="font-size:12px;vertical-align:-1px;margin-right:3px"></i>物件</span><span class="det-val">${c.prop||'未定'}${c.room?' '+c.room+'号室':''}</span></div>
+    ${c.memo?`<div class="det-row"><span class="det-key"><i class="ti ti-note" style="font-size:12px;vertical-align:-1px;margin-right:3px"></i>メモ</span><span class="det-val" style="text-align:left;font-weight:400">${c.memo}</span></div>`:''}
+    ${sLbl?`<div class="det-row"><span class="det-key">取込元</span><span class="det-val" style="font-weight:400">${sLbl}</span></div>`:''}
+    ${c.stage===4?`<div class="section-label" style="margin-top:14px">売上内訳</div>${SK.map((k,i)=>c.sales[i]?`<div class="det-row"><span class="det-key">${k}</span><span class="det-val">${fmt(c.sales[i])}</span></div>`:'').join('')}<div class="rev-total" style="margin-top:8px"><span style="font-size:14px;font-weight:700">合計</span><span style="font-size:18px;font-weight:700">${fmt(st)}</span></div>`:''}
+    <div style="display:flex;gap:7px;margin-top:16px">
+      <button class="btn" style="flex:1;padding:10px;font-size:12px" onclick="openEd(${c.id})"><i class="ti ti-edit"></i> 編集</button>
+      ${c.stage<4?`<button class="btn" style="flex:1;padding:10px;font-size:12px" onclick="adv(${c.id});cm('m-det')">${STG[c.stage+1]}へ進める <i class="ti ti-arrow-right"></i></button>`:''}
+    </div>`;
+  document.getElementById('m-det').style.display='block';
+}
+function cm(id){document.getElementById(id).style.display='none';}
+
+// 起動：スプレッドシートからデータ読み込み
+loadClients().then(()=>renderD());
+
+</script>
+</body>
+</html>
