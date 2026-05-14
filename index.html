@@ -406,7 +406,8 @@ function isGasConnected(){ return GAS_URL && GAS_URL !== 'YOUR_GAS_WEB_APP_URL_H
 async function gasCall(action, payload){
   let url = `${GAS_URL}?action=${action}`;
   if(payload) url += `&payload=${encodeURIComponent(JSON.stringify(payload))}`;
-  const res = await fetch(url);
+  const res = await fetch(url, {redirect:'follow'});
+  if(!res.ok) throw new Error(`HTTP ${res.status}`);
   return res.json();
 }
 
@@ -432,23 +433,33 @@ async function loadClients(){
       hideBanner();
     } else { throw new Error(r.error); }
   }catch(e){
+    console.error('loadClients error:', e);
     clients=loadLocal();
-    showBanner('オフライン：ローカルデータを表示中', true);
-    gasReady=false;
+    gasReady=true; // 読み込み失敗でも書き込みは試みる
+    showBanner('同期エラー：再試行します', true);
+    setTimeout(()=>loadClients(), 5000); // 5秒後に再試行
   }
 }
 
 // ── 保存（スプレッドシートへ即反映） ─────────────────
 async function save(client){
   saveLocal();
-  if(!isGasConnected()||!gasReady) return;
-  try{ await gasCall('saveClient', {client}); }catch(e){}
+  if(!isGasConnected()) return;
+  try{
+    await gasCall('saveClient', {client});
+  }catch(e){
+    console.error('save error:', e);
+  }
 }
 
 // ── 削除（スプレッドシートからも削除） ───────────────
 async function deleteFromSheet(id){
-  if(!isGasConnected()||!gasReady) return;
-  try{ await gasCall('deleteClient', {id}); }catch(e){}
+  if(!isGasConnected()) return;
+  try{
+    await gasCall('deleteClient', {id});
+  }catch(e){
+    console.error('delete error:', e);
+  }
 }
 
 // ── アンケートデータ取得 ──────────────────────────
