@@ -406,9 +406,17 @@ function isGasConnected(){ return GAS_URL && GAS_URL !== 'YOUR_GAS_WEB_APP_URL_H
 async function gasCall(action, payload){
   let url = `${GAS_URL}?action=${action}`;
   if(payload) url += `&payload=${encodeURIComponent(JSON.stringify(payload))}`;
-  const res = await fetch(url, {redirect:'follow'});
-  if(!res.ok) throw new Error(`HTTP ${res.status}`);
-  return res.json();
+  
+  // 読み取り系はレスポンスが必要なので通常fetch
+  if(action === 'getClients' || action === 'getAnket'){
+    const res = await fetch(url, {redirect:'follow'});
+    if(!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.json();
+  }
+  
+  // 書き込み系はレスポンス不要なのでno-corsで送信（CORSブロック回避）
+  await fetch(url, {mode:'no-cors', redirect:'follow'});
+  return {ok:true};
 }
 
 // ── ローカルキャッシュに保存（オフライン時の保険） ──
